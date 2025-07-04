@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/service"
@@ -28,6 +29,7 @@ type loginRequest struct {
 }
 
 func (h *AuthHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(">>> Вызван RegisterHandler")
 	var req registerRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -42,7 +44,7 @@ func (h *AuthHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User registred successfukky"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "User registred successfully"})
 }
 
 func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {

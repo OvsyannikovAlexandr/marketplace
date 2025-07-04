@@ -2,8 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"log"
 	"time"
 
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/domain"
@@ -21,7 +19,7 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 func (r *UserRepository) CreateUser(ctx context.Context, user domain.User) error {
 	query := `
 		INSERT INTO users (name, email, password_hash, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $%)
+		VALUES ($1, $2, $3, $4, $5)
 	`
 	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.PasswordHash, time.Now(), time.Now())
 	return err
@@ -45,8 +43,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (doma
 	)
 
 	if err != nil {
-		log.Fatalf("Ошибка получения пользоателя по email: %v", err)
-		return domain.User{}, errors.New("user not found")
+		return domain.User{}, err
 	}
 
 	return user, nil

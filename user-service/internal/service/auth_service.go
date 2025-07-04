@@ -9,6 +9,8 @@ import (
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/domain"
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,9 +23,13 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 }
 
 func (s *AuthService) Register(ctx context.Context, name, email, password string) error {
-	_, err := s.userRepo.GetUserByEmail(ctx, email)
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err == nil {
 		return errors.New("user already exists")
+	}
+
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return err
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -31,7 +37,7 @@ func (s *AuthService) Register(ctx context.Context, name, email, password string
 		return err
 	}
 
-	user := domain.User{
+	user = domain.User{
 		Name:         name,
 		Email:        email,
 		PasswordHash: string(hash),
