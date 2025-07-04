@@ -9,6 +9,8 @@ import (
 
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/db"
 	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/handler"
+	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/repository"
+	"github.com/OvsyannikovAlexandr/marketplace/user-service/internal/service"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -20,17 +22,20 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := db.NewDatabase(ctx)
+	dbpool, err := db.NewDatabase(ctx)
 	if err != nil {
 		log.Fatalf("failed to init postgres: %v", err)
 	}
-	defer db.Close()
+	defer dbpool.Close()
 	log.Println("Connected to PostgreSQL")
 
-	router := mux.NewRouter()
+	userRepo := repository.NewUserRepository(dbpool)
+	authService := service.NewAuthService(userRepo)
+	authHendler := handler.NewAuthHandler(authService)
 
-	router.HandleFunc("/register", handler.RegisterHandler).Methods("POST")
-	router.HandleFunc("/login", handler.LoginHandler).Methods("POST")
+	router := mux.NewRouter()
+	router.HandleFunc("/register", authHendler.RegisterHandler).Methods("POST")
+	router.HandleFunc("/login", authHendler.LoginHandler).Methods("POST")
 
 	port := os.Getenv("PORT")
 	if port == "" {
