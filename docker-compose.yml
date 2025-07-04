@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:15
@@ -13,12 +11,25 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  migration-service:
+    build:
+      context: ./migration-service
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=users
+    volumes:
+      - ./migration-service/migrations:/app/migrations
+
   user-service:
     build:
       context: ./user-service
-    container_name: user-service
     depends_on:
-      - postgres
+      - migration-service
     ports:
       - "8081:8080"
     environment:
