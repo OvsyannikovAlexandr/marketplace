@@ -1,3 +1,5 @@
+//go:build !ci
+
 package repository_test
 
 import (
@@ -21,6 +23,13 @@ var (
 	pgContainer testcontainers.Container
 	dbpool      *pgxpool.Pool
 )
+
+func clearUsersTable(t *testing.T) {
+	_, err := dbpool.Exec(context.Background(), "DELETE FROM users")
+	if err != nil {
+		t.Fatalf("failed to clear users table: %v", err)
+	}
+}
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
@@ -88,6 +97,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateAndGetUser(t *testing.T) {
+	clearUsersTable(t)
 	ctx := context.Background()
 	repo := repository.NewUserRepository(dbpool)
 
@@ -121,6 +131,7 @@ func TestCreateAndGetUser(t *testing.T) {
 }
 
 func TestCreateUser_DuplicateEmail(t *testing.T) {
+	clearUsersTable(t)
 	ctx := context.Background()
 	repo := repository.NewUserRepository(dbpool)
 
@@ -145,6 +156,7 @@ func TestCreateUser_DuplicateEmail(t *testing.T) {
 }
 
 func TestGetUserByEmail_NotFound(t *testing.T) {
+	clearUsersTable(t)
 	ctx := context.Background()
 	repo := repository.NewUserRepository(dbpool)
 

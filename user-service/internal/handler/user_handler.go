@@ -56,7 +56,7 @@ func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.authService.Login(context.Background(), req.Email, req.Password)
 	if err != nil {
-		http.Error(w, "Invalid email or password", http.StatusBadRequest)
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
