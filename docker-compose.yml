@@ -47,5 +47,20 @@ services:
       - DB_NAME=users
       - JWT_SECRET=supersecretkey
 
+  product-service:
+    build:
+      context: ./product-service
+    depends_on:
+      migration-service:
+        condition: service_completed_successfully
+    ports:
+      - "8082:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=users
+
 volumes:
   pgdata:
