@@ -16,6 +16,11 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+type UserRepositoryInterface interface {
+	CreateUser(ctx context.Context, user domain.User) error
+	GetUserByEmail(ctx context.Context, email string) (domain.User, error)
+}
+
 func (r *UserRepository) CreateUser(ctx context.Context, user domain.User) error {
 	query := `
 		INSERT INTO users (name, email, password_hash, created_at, updated_at)
