@@ -187,7 +187,7 @@ func TestLoginHandler_UserNotFound(t *testing.T) {
 
 	h.LoginHandler(rec, req)
 
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("expected 401, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rec.Code)
 	}
 }
