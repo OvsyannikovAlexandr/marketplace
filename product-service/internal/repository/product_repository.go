@@ -19,10 +19,10 @@ func NewProductRepository(db *pgxpool.Pool) *ProductRepository {
 
 func (r *ProductRepository) CreateProduct(ctx context.Context, p domain.Product) error {
 	query := `
-		INSERT INTO product (name, description, price, created_at, updated_at)
+		INSERT INTO products (name, description, price, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5)
 	`
-	_, err := r.db.Exec(ctx, query, p.Name, p.Description, p.Price, p.CreatedAt, time.Now(), time.Now())
+	_, err := r.db.Exec(ctx, query, p.Name, p.Description, p.Price, time.Now(), time.Now())
 
 	return err
 }
@@ -38,7 +38,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]domain.Produc
 	var products []domain.Product
 	for rows.Next() {
 		var p domain.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
 		products = append(products, p)
