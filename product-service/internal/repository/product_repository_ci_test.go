@@ -110,7 +110,7 @@ func TestGetProductByID_NotFound(t *testing.T) {
 	ctx := context.Background()
 	repo := repository.NewProductRepository(dbpool)
 
-	_, err := repo.GetProdcutByID(ctx, 9999999)
+	_, err := repo.GetProductByID(ctx, 9999999)
 	if err == nil {
 		t.Fatalf("expected error not dound product, got nil")
 	}
@@ -155,8 +155,7 @@ func TestDeleteProduct_Success(t *testing.T) {
 		t.Fatalf("DeleteProduct failed: %v", err)
 	}
 
-	// Проверяем, что продукт больше не доступен
-	_, err = repo.GetProdcutByID(ctx, id)
+	_, err = repo.GetProductByID(ctx, id)
 	if err == nil {
 		t.Fatal("expected error after delete, got nil")
 	}
