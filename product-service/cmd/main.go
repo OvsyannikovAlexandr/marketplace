@@ -1,3 +1,9 @@
+// @title           Marketplace Product Service API
+// @version         1.0
+// @description     Документация для сервиса продуктов
+// @host      localhost:8080
+// @BasePath  /
+
 package main
 
 import (
@@ -7,12 +13,15 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/OvsyannikovAlexandr/marketplace/product-service/docs"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/db"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/handler"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/repository"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/service"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -42,6 +51,8 @@ func main() {
 	router.HandleFunc("/products", h.GetAll).Methods("GET")
 	router.HandleFunc("/products/{id}", h.GetByID).Methods("GET")
 	router.HandleFunc("/products/{id}", h.Delete).Methods("DELETE")
+
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

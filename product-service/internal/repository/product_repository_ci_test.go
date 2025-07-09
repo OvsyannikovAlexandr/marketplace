@@ -107,6 +107,7 @@ func TestCreateAndGetALLProduct(t *testing.T) {
 }
 
 func TestGetProductByID_NotFound(t *testing.T) {
+	clearProductsTable(t)
 	ctx := context.Background()
 	repo := repository.NewProductRepository(dbpool)
 

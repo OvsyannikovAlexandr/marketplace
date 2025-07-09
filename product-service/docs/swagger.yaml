@@ -1,0 +1,126 @@
+basePath: /
+definitions:
+  domain.Product:
+    properties:
+      created_at:
+        description: CreatedAt дата и время создания продукта
+        type: string
+      description:
+        description: Description описание продукта
+        type: string
+      id:
+        description: ID уникальный идентификатор продукта
+        type: integer
+      name:
+        description: Name название продукта
+        type: string
+      price:
+        description: Price цена продукта в валюте USD
+        type: number
+      updated_at:
+        description: UpdatedAt дата и время последнего обновления продукта
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Документация для сервиса продуктов
+  title: Marketplace Product Service API
+  version: "1.0"
+paths:
+  /products:
+    get:
+      description: Получает все продукты из базы
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Product'
+            type: array
+        "500":
+          description: internal error
+          schema:
+            type: string
+      summary: Получить все продукты
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый продукт в базу
+      parameters:
+      - description: Продукт
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid body
+          schema:
+            type: string
+        "500":
+          description: internal error
+          schema:
+            type: string
+      summary: Создать продукт
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      description: Удаляет продукт по ID
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid ID
+          schema:
+            type: string
+        "500":
+          description: internal error
+          schema:
+            type: string
+      summary: Удаление продукта
+      tags:
+      - products
+    get:
+      description: Получает продукт по ID
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+        "400":
+          description: invalid ID
+          schema:
+            type: string
+        "404":
+          description: not found
+          schema:
+            type: string
+      summary: Получить продукт по ID
+      tags:
+      - products
+swagger: "2.0"
