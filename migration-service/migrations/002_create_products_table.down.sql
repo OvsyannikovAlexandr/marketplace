@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS products;
+DROP SCHEMA IF EXISTS product_service CASCADE;

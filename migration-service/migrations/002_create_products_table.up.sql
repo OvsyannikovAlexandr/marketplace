@@ -1,4 +1,6 @@
-CREATE TABLE products (
+CREATE SCHEMA IF NOT EXISTS product_service;
+
+CREATE TABLE IF NOT EXISTS product_service.products (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,

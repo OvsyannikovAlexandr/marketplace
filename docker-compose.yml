@@ -1,9 +1,9 @@
 services:
   postgres:
     image: postgres:15
-    container_name: postgres_user
+    container_name: marketplace_postgres
     environment:
-      POSTGRES_DB: users
+      POSTGRES_DB: marketplace
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -27,7 +27,7 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=users
+      - DB_NAME=marketplace
     volumes:
       - ./migration-service/migrations:/app/migrations
 
@@ -44,7 +44,7 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=users
+      - DB_NAME=marketplace
       - JWT_SECRET=supersecretkey
 
   product-service:
@@ -60,7 +60,7 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=users
+      - DB_NAME=marketplace
 
 volumes:
   pgdata:

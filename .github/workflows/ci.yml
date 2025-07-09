@@ -60,7 +60,9 @@ jobs:
       - name: Run migration-service
         run: |
           cd migration-service
-          go run cmd/main.go
+          for i in {1..10}; do
+            go run cmd/main.go && break || sleep 2
+          done
 
       - name: Build & test user-service
         run: |

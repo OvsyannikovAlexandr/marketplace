@@ -38,7 +38,29 @@ func TestMain(m *testing.M) {
 		panic("failed to connect to database: " + err.Error())
 	}
 
-	_, err = dbpool.Exec(ctx, `DELETE FROM users`)
+	_, err = dbpool.Exec(ctx, `DROP SCHEMA IF EXISTS user_service CASCADE`)
+	if err != nil {
+		panic(err)
+	}
+
+	schema := `
+		CREATE SCHEMA IF NOT EXISTS user_service;
+
+		CREATE TABLE user_service.users (
+			id SERIAL PRIMARY KEY,
+			name TEXT NOT NULL,
+			description TEXT,
+			price NUMERIC(10,2) NOT NULL,
+			created_at TIMESTAMP NOT NULL DEFAULT now(),
+			updated_at TIMESTAMP NOT NULL DEFAULT now()
+		);`
+
+	_, err = dbpool.Exec(ctx, schema)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = dbpool.Exec(ctx, `DELETE FROM user_service.users`)
 	if err != nil {
 		panic("failed to clear table: " + err.Error())
 	}
@@ -48,7 +70,7 @@ func TestMain(m *testing.M) {
 }
 
 func clearUsersTable(t *testing.T) {
-	_, err := dbpool.Exec(context.Background(), `DELETE FROM users`)
+	_, err := dbpool.Exec(context.Background(), `DELETE FROM user_service.users`)
 	if err != nil {
 		t.Fatalf("failed to clear users table: %v", err)
 	}
