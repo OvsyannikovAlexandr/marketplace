@@ -46,7 +46,9 @@ jobs:
         run: go install github.com/swaggo/swag/cmd/swag@latest
       
       - name: Generate Swagger docs
-        run: swag init -g cmd/main.go
+        run: |
+          cd product-service
+          swag init -g cmd/main.go
 
       - name: Wait for Postgres to be ready
         run: |
