@@ -18,7 +18,7 @@ func NewCartRepository(db *pgxpool.Pool) *CartRepository {
 
 type CartRepositoryInterface interface {
 	AddItem(ctx context.Context, item domain.CartItem) error
-	GetItemsByUser(ctx context.Context, userID int64) ([]domain.CartItem, error)
+	GetItemsByUserID(ctx context.Context, userID int64) ([]domain.CartItem, error)
 	DeleteItem(ctx context.Context, userID, productID int64) error
 	ClearCart(ctx context.Context, userID int64) error
 }
@@ -35,7 +35,7 @@ func (r *CartRepository) AddItem(ctx context.Context, item domain.CartItem) erro
 	return err
 }
 
-func (r *CartRepository) GetItemsByUser(ctx context.Context, userID int64) ([]domain.CartItem, error) {
+func (r *CartRepository) GetItemsByUserID(ctx context.Context, userID int64) ([]domain.CartItem, error) {
 	query := `
 		SELECT id, user_id, product_id, quantity, created_at, updated_at
 		FROM cart_service.cart_items

@@ -30,14 +30,16 @@ func main() {
 
 	fmt.Println("Connected to PostgreSQL")
 
+	productServiceURL := os.Getenv("PRODUCT_SERVICE_URL")
+
 	cartRepository := repository.NewCartRepository(dbpool)
-	cartService := service.NewCartService(cartRepository)
+	cartService := service.NewCartService(cartRepository, productServiceURL)
 	cartHandler := handler.NewCartHandler(cartService)
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/cart", cartHandler.AddItem).Methods("POST")
-	router.HandleFunc("/cart/{user_id}", cartHandler.GetItems).Methods("GET")
+	router.HandleFunc("/cart/{user_id}", cartHandler.GetCartDetailsHandler).Methods("GET")
 	router.HandleFunc("/cart/{user_id}/clear", cartHandler.ClearCart).Methods("DELETE")
 	router.HandleFunc("/cart/{user_id}/{product_id:[0-9]+}", cartHandler.DeleteItem).Methods("DELETE")
 

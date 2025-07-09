@@ -56,7 +56,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]domain.Produc
 func (r *ProductRepository) GetProductByID(ctx context.Context, id int64) (domain.Product, error) {
 	query := `SELECT id, name, description, price, created_at, updated_at FROM product_service.products WHERE id = $1`
 	var p domain.Product
-	err := r.db.QueryRow(ctx, query, id).Scan(&p.ID, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt)
+	err := r.db.QueryRow(ctx, query, id).Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return p, errors.New("product not fuond")
 	}
