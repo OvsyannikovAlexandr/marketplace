@@ -38,23 +38,9 @@ func TestMain(m *testing.M) {
 		panic("failed to connect to database: " + err.Error())
 	}
 
-	_, err = dbpool.Exec(ctx, `DROP TABLE IF EXISTS users`)
+	_, err = dbpool.Exec(ctx, `DELETE FROM products`)
 	if err != nil {
-		panic(err)
-	}
-
-	schema := `
-	CREATE TABLE products (
-    	id SERIAL PRIMARY KEY,
-    	name TEXT NOT NULL,
-    	description TEXT,
-    	price NUMERIC(10,2) NOT NULL,
-    	created_at TIMESTAMP NOT NULL DEFAULT now(),
-    	updated_at TIMESTAMP NOT NULL DEFAULT now()
-	)`
-	_, err = dbpool.Exec(ctx, schema)
-	if err != nil {
-		panic(err)
+		panic("failed to clear table: " + err.Error())
 	}
 
 	code := m.Run()
