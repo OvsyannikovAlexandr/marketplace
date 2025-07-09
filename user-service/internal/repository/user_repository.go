@@ -23,7 +23,7 @@ type UserRepositoryInterface interface {
 
 func (r *UserRepository) CreateUser(ctx context.Context, user domain.User) error {
 	query := `
-		INSERT INTO users (name, email, password_hash, created_at, updated_at)
+		INSERT INTO user_service.users (name, email, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5)
 	`
 	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.PasswordHash, time.Now(), time.Now())
@@ -33,7 +33,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user domain.User) error
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (domain.User, error) {
 	query := `
 		SELECT id, name, email, password_hash, created_at, updated_at
-		FROM users
+		FROM user_service.users
 		WHERE email = $1
 	`
 
