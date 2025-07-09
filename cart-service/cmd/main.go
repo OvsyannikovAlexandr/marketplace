@@ -41,6 +41,7 @@ func main() {
 	router.HandleFunc("/cart", cartHandler.AddItem).Methods("POST")
 	router.HandleFunc("/cart/{user_id}", cartHandler.GetCartDetailsHandler).Methods("GET")
 	router.HandleFunc("/cart/{user_id}/clear", cartHandler.ClearCart).Methods("DELETE")
+	router.HandleFunc("/cart/{user_id}/checkout", cartHandler.Checkout).Methods("POST")
 	router.HandleFunc("/cart/{user_id}/{product_id:[0-9]+}", cartHandler.DeleteItem).Methods("DELETE")
 
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

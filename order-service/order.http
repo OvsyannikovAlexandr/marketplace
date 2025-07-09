@@ -12,7 +12,6 @@ Content-Type: "application/json"
 ###
 
 DELETE  http://localhost:8083/orders/1 
-Content-Type: "application/json"
 
 ###
 
@@ -20,4 +19,4 @@ GET http://localhost:8083/orders
 
 ###
 
-GET http://localhost:8083/orders/2 
+GET http://localhost:8083/orders/1 

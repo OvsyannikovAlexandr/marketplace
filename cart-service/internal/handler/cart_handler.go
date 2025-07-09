@@ -100,3 +100,18 @@ func (h *CartHandler) GetCartDetailsHandler(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
 }
+
+func (h *CartHandler) Checkout(w http.ResponseWriter, r *http.Request) {
+	userIDStr := mux.Vars(r)["user_id"]
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.svc.Checkout(r.Context(), userID); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}

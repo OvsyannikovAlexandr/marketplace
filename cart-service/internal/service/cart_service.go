@@ -1,11 +1,13 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/domain"
@@ -49,6 +51,7 @@ type CartServiceInterface interface {
 	DeleteItem(ctx context.Context, userID, productID int64) error
 	ClearCart(ctx context.Context, userID int64) error
 	GetCartWithDetails(ctx context.Context, userID int64) ([]domain.CartItemDetail, error)
+	Checkout(ctx context.Context, userID int64) error
 }
 
 func (s *CartService) AddItem(ctx context.Context, item domain.CartItem) error {
@@ -96,4 +99,56 @@ func (s *CartService) GetCartWithDetails(ctx context.Context, userID int64) ([]d
 	}
 
 	return detailedItems, nil
+}
+
+func (s *CartService) Checkout(ctx context.Context, userID int64) error {
+	items, err := s.repo.GetItemsByUserID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if len(items) == 0 {
+		return errors.New("cart is empty")
+	}
+
+	var productIDs []int64
+	totalPrice := 0.0
+	totalQuantity := 0
+
+	for _, item := range items {
+		product, err := s.getProductDetails(item.ProductID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch product %d: %w", item.ProductID, err)
+		}
+		totalPrice += product.Price * float64(item.Quantity)
+		totalQuantity += item.Quantity
+		productIDs = append(productIDs, item.ProductID)
+	}
+
+	order := map[string]interface{}{
+		"user_id":     userID,
+		"product_ids": productIDs,
+		"quantity":    totalQuantity,
+		"total_price": totalPrice,
+		"status":      "new",
+	}
+
+	orderServiceURL := os.Getenv("ORDER_SERVICE_URL")
+	resp, err := http.Post(orderServiceURL+"/orders", "application/json", encodeToJSON(order))
+	if err != nil {
+		return fmt.Errorf("failed to create order: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("order-service returned status %d", resp.StatusCode)
+	}
+
+	// Очистить корзину
+	return s.repo.ClearCart(ctx, userID)
+}
+
+func encodeToJSON(v interface{}) *bytes.Buffer {
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(v)
+	return buf
 }

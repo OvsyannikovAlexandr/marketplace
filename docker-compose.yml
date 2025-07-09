@@ -92,6 +92,7 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=marketplace
       - PRODUCT_SERVICE_URL=http://product-service:8080
+      - ORDER_SERVICE_URL=http://order-service:8080
 
 volumes:
   pgdata:

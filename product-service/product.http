@@ -2,14 +2,22 @@ POST http://localhost:8082/products
 Content-Type: "application/json"
 
 {
-    "name":"MacBook",
+    "name":"MacBookM2",
     "description": "Laptop",
-    "price": 160000
+    "price": 2000
 }
 
 ###
 
 GET http://localhost:8082/products/2
+
+###
+
+GET http://localhost:8082/products/1
+
+###
+
+GET http://localhost:8082/products
 
 ###
 
