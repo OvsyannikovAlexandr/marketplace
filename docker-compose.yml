@@ -113,5 +113,11 @@ services:
       - PRODUCT_SERVICE_URL=http://product-service:8080
       - ORDER_SERVICE_URL=http://order-service:8080
 
+    logging-service:
+      build:
+        context: ./logging-service
+      depends_on:
+        - kafka
+
 volumes:
   pgdata:
