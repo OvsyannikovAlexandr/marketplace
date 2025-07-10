@@ -34,8 +34,8 @@ func main() {
 	authHendler := handler.NewAuthHandler(authService)
 
 	router := mux.NewRouter()
-	router.HandleFunc("/register", authHendler.RegisterHandler).Methods("POST")
-	router.HandleFunc("/login", authHendler.LoginHandler).Methods("POST")
+	router.HandleFunc("/users/register", authHendler.RegisterHandler).Methods("POST")
+	router.HandleFunc("/users/login", authHendler.LoginHandler).Methods("POST")
 
 	port := os.Getenv("PORT")
 	if port == "" {

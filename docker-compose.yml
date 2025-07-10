@@ -153,6 +153,8 @@ services:
       - product-service
       - cart-service
       - order-service
+    environment:
+      - JWT_SECRET=supersecretkey
 
 volumes:
   pgdata:
