@@ -54,7 +54,7 @@ func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
 		ProductIDs: order.ProductIDs,
 		Quantity:   order.Quantity,
 		TotalPrice: order.TotalPrice,
-		CreatedAt:  order.CreatedAt.Format(time.RFC3339),
+		CreatedAt:  time.Now(),
 	})
 
 	return nil

@@ -17,12 +17,12 @@ type Producer interface {
 }
 
 type OrderCreatedEvent struct {
-	OrderID    int64   `json:"order_id"`
-	UserID     int64   `json:"user_id"`
-	ProductIDs []int64 `json:"product_ids"`
-	Quantity   int     `json:"quantity"`
-	TotalPrice float64 `json:"total_price"`
-	CreatedAt  string  `json:"created_at"`
+	OrderID    int64     `json:"order_id"`
+	UserID     int64     `json:"user_id"`
+	ProductIDs []int64   `json:"product_ids"`
+	Quantity   int       `json:"quantity"`
+	TotalPrice float64   `json:"total_price"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func NewOrderProducer(brokerAddress, topic string) *OrderProducer {

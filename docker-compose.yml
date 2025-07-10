@@ -40,6 +40,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  redis:
+    image: redis:7.2
+    container_name: marketplace_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   migration-service:
     build:
@@ -86,6 +99,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=marketplace
+      - REDIS_ADDR=redis:6379
 
   order-service:
     build:
@@ -119,6 +133,7 @@ services:
       - DB_NAME=marketplace
       - PRODUCT_SERVICE_URL=http://product-service:8080
       - ORDER_SERVICE_URL=http://order-service:8080
+      - REDIS_ADDR=redis:6379
 
   logging-service:
     build:
@@ -130,3 +145,4 @@ services:
 
 volumes:
   pgdata:
+  redisdata:

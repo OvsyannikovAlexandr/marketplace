@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/domain"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/service"
 )
@@ -51,7 +52,8 @@ func setupService() (*service.ProductService, *mockProductRepo) {
 	mock := &mockProductRepo{
 		products: make(map[int64]domain.Product),
 	}
-	svc := service.NewProductService(mock)
+	cache := cache.NewRedisCache("redis:6379")
+	svc := service.NewProductService(mock, cache)
 	return svc, mock
 }
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/db"
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/handler"
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/repository"
@@ -32,8 +33,11 @@ func main() {
 
 	productServiceURL := os.Getenv("PRODUCT_SERVICE_URL")
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisCache := cache.NewRedisCache(redisAddr)
+
 	cartRepository := repository.NewCartRepository(dbpool)
-	cartService := service.NewCartService(cartRepository, productServiceURL)
+	cartService := service.NewCartService(cartRepository, productServiceURL, redisCache)
 	cartHandler := handler.NewCartHandler(cartService)
 
 	router := mux.NewRouter()

@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/domain"
 	"github.com/OvsyannikovAlexandr/marketplace/cart-service/internal/repository"
 )
@@ -17,10 +19,11 @@ import (
 type CartService struct {
 	repo              repository.CartRepositoryInterface
 	productServiceURL string
+	cache             *cache.RedisCache
 }
 
-func NewCartService(repo repository.CartRepositoryInterface, productServiceURL string) *CartService {
-	return &CartService{repo: repo, productServiceURL: productServiceURL}
+func NewCartService(repo repository.CartRepositoryInterface, productServiceURL string, cache *cache.RedisCache) *CartService {
+	return &CartService{repo: repo, productServiceURL: productServiceURL, cache: cache}
 }
 
 func (s *CartService) getProductDetails(productID int64) (domain.Product, error) {
@@ -64,8 +67,13 @@ func (s *CartService) AddItem(ctx context.Context, item domain.CartItem) error {
 	if item.Quantity <= 0 {
 		return errors.New("quantity must be possible")
 	}
-
-	return s.repo.AddItem(ctx, item)
+	err := s.repo.AddItem(ctx, item)
+	if err != nil {
+		return err
+	}
+	cacheKey := fmt.Sprintf("cart:user:%d", item.UserID)
+	_ = s.cache.Delete(ctx, cacheKey)
+	return nil
 }
 
 func (s *CartService) GetItems(ctx context.Context, userID int64) ([]domain.CartItem, error) {
@@ -73,14 +81,38 @@ func (s *CartService) GetItems(ctx context.Context, userID int64) ([]domain.Cart
 }
 
 func (s *CartService) DeleteItem(ctx context.Context, userID, productID int64) error {
-	return s.repo.DeleteItem(ctx, userID, productID)
+	err := s.repo.DeleteItem(ctx, userID, productID)
+	if err != nil {
+		return err
+	}
+	cacheKey := fmt.Sprintf("cart:user%d", userID)
+	_ = s.cache.Delete(ctx, cacheKey)
+	return nil
 }
 
 func (s *CartService) ClearCart(ctx context.Context, userID int64) error {
-	return s.repo.ClearCart(ctx, userID)
+	err := s.repo.ClearCart(ctx, userID)
+	if err != nil {
+		return err
+	}
+	cacheKey := fmt.Sprintf("cart:user:%d", userID)
+	_ = s.cache.Delete(ctx, cacheKey)
+	return nil
 }
 
 func (s *CartService) GetCartWithDetails(ctx context.Context, userID int64) ([]domain.CartItemDetail, error) {
+	cacheKey := fmt.Sprintf("cart:user:%d", userID)
+
+	if cached, err := s.cache.Get(ctx, cacheKey); err == nil {
+		log.Println("Cache cart HIT:", cacheKey)
+		var items []domain.CartItemDetail
+		if err := json.Unmarshal([]byte(cached), &items); err == nil {
+			return items, nil
+		}
+	}
+
+	log.Println("Cache cart MISS:", cacheKey)
+
 	items, err := s.repo.GetItemsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -97,6 +129,9 @@ func (s *CartService) GetCartWithDetails(ctx context.Context, userID int64) ([]d
 			Quantity: item.Quantity,
 		})
 	}
+
+	data, _ := json.Marshal(detailedItems)
+	_ = s.cache.Set(ctx, cacheKey, string(data), time.Minute*30)
 
 	return detailedItems, nil
 }
@@ -143,6 +178,7 @@ func (s *CartService) Checkout(ctx context.Context, userID int64) error {
 		return fmt.Errorf("order-service returned status %d", resp.StatusCode)
 	}
 
+	_ = s.cache.Delete(ctx, fmt.Sprintf("cart:user:%d", userID))
 	// Очистить корзину
 	return s.repo.ClearCart(ctx, userID)
 }

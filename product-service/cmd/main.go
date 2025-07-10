@@ -14,6 +14,7 @@ import (
 	"os"
 
 	_ "github.com/OvsyannikovAlexandr/marketplace/product-service/docs"
+	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/db"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/handler"
 	"github.com/OvsyannikovAlexandr/marketplace/product-service/internal/repository"
@@ -39,8 +40,11 @@ func main() {
 
 	fmt.Println("Connected to PostgreSQl")
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisCache := cache.NewRedisCache(redisAddr)
+
 	repo := repository.NewProductRepository(dbpool)
-	svc := service.NewProductService(repo)
+	svc := service.NewProductService(repo, redisCache)
 	h := handler.NewProductHandler(svc)
 
 	router := mux.NewRouter()
