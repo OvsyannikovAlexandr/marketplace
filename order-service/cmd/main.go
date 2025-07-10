@@ -31,8 +31,8 @@ func main() {
 
 	fmt.Println("Connected to PostgreSQl")
 
-	kafkaBroker := os.Getenv("KAFKA_BROKER_URL")
-	kafkaTopic := os.Getenv("KAFKA_ORDER_TOPIC")
+	kafkaBroker := os.Getenv("KAFKA_BROKER")
+	kafkaTopic := "logs"
 
 	producer := kafka.NewOrderProducer(kafkaBroker, kafkaTopic)
 

@@ -2,9 +2,9 @@ POST http://localhost:8082/products
 Content-Type: "application/json"
 
 {
-    "name":"MacBookM2",
+    "name":"MacBookM3",
     "description": "Laptop",
-    "price": 2000
+    "price": 4000
 }
 
 ###

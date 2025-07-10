@@ -14,7 +14,7 @@ type OrderRepository struct {
 }
 
 type OrderRepositoryInterface interface {
-	CreateOrder(ctx context.Context, order domain.Order) error
+	CreateOrder(ctx context.Context, order *domain.Order) error
 	GetOrderByID(ctx context.Context, id int64) (domain.Order, error)
 	GetAllOrders(ctx context.Context) ([]domain.Order, error)
 	DeleteOrder(ctx context.Context, id int64) error
@@ -24,7 +24,7 @@ func NewOrderRepository(db *pgxpool.Pool) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-func (r *OrderRepository) CreateOrder(ctx context.Context, order domain.Order) error {
+func (r *OrderRepository) CreateOrder(ctx context.Context, order *domain.Order) error {
 	query := `
 		INSERT INTO order_service.orders (user_id, product_ids, quantity, total_price, status, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())

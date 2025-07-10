@@ -42,15 +42,22 @@ func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
 	if order.Status == "" {
 		order.Status = "new"
 	}
+
+	err := s.repo.CreateOrder(ctx, &order)
+	if err != nil {
+		return err
+	}
+
 	_ = s.producer.SendOrderCreated(ctx, kafka.OrderCreatedEvent{
 		OrderID:    order.ID,
 		UserID:     order.UserID,
 		ProductIDs: order.ProductIDs,
+		Quantity:   order.Quantity,
 		TotalPrice: order.TotalPrice,
 		CreatedAt:  order.CreatedAt.Format(time.RFC3339),
 	})
 
-	return s.repo.CreateOrder(ctx, order)
+	return nil
 }
 
 func (s *OrderServise) GetAll(ctx context.Context) ([]domain.Order, error) {
