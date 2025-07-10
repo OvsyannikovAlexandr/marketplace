@@ -2,9 +2,13 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
+	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/domain"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/repository"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/pkg/kafka"
@@ -13,6 +17,7 @@ import (
 type OrderServise struct {
 	repo     repository.OrderRepositoryInterface
 	producer kafka.Producer
+	cache    *cache.RedisCache
 }
 
 type OrderServiceInterface interface {
@@ -22,8 +27,8 @@ type OrderServiceInterface interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-func NewOrderService(repo repository.OrderRepositoryInterface, producer kafka.Producer) *OrderServise {
-	return &OrderServise{repo: repo, producer: producer}
+func NewOrderService(repo repository.OrderRepositoryInterface, producer kafka.Producer, cache *cache.RedisCache) *OrderServise {
+	return &OrderServise{repo: repo, producer: producer, cache: cache}
 }
 
 func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
@@ -57,6 +62,9 @@ func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
 		CreatedAt:  time.Now(),
 	})
 
+	cacheKey := fmt.Sprintf("order:%d", order.ID)
+	_ = s.cache.Delete(ctx, cacheKey)
+
 	return nil
 }
 
@@ -65,9 +73,34 @@ func (s *OrderServise) GetAll(ctx context.Context) ([]domain.Order, error) {
 }
 
 func (s *OrderServise) GetByID(ctx context.Context, id int64) (domain.Order, error) {
-	return s.repo.GetOrderByID(ctx, id)
+	cacheKey := fmt.Sprintf("order:%d", id)
+
+	if cached, err := s.cache.Get(ctx, cacheKey); err == nil {
+		var order domain.Order
+		log.Println("Cache order HIT: ", cacheKey)
+		if err := json.Unmarshal([]byte(cached), &order); err == nil {
+			return order, nil
+		}
+	}
+
+	log.Println("Cache order MISS: ", cacheKey)
+	order, err := s.repo.GetOrderByID(ctx, id)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	data, _ := json.Marshal(order)
+	_ = s.cache.Set(ctx, cacheKey, string(data), time.Minute*10)
+
+	return order, nil
 }
 
 func (s *OrderServise) Delete(ctx context.Context, id int64) error {
-	return s.repo.DeleteOrder(ctx, id)
+	err := s.repo.DeleteOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	cacheKey := fmt.Sprintf("order:%d", id)
+	_ = s.cache.Delete(ctx, cacheKey)
+
+	return nil
 }

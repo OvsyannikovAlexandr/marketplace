@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/cache"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/db"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/handler"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/repository"
@@ -35,9 +36,11 @@ func main() {
 	kafkaTopic := "logs"
 
 	producer := kafka.NewOrderProducer(kafkaBroker, kafkaTopic)
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisCache := cache.NewRedisCache(redisAddr)
 
 	orderRepo := repository.NewOrderRepository(dbpool)
-	orderService := service.NewOrderService(orderRepo, producer)
+	orderService := service.NewOrderService(orderRepo, producer, redisCache)
 	orederHandler := handler.NewOrderHandler(orderService)
 
 	router := mux.NewRouter()
