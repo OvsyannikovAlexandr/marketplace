@@ -11,6 +11,7 @@ import (
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/handler"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/repository"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/service"
+	"github.com/OvsyannikovAlexandr/marketplace/order-service/pkg/kafka"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -30,8 +31,13 @@ func main() {
 
 	fmt.Println("Connected to PostgreSQl")
 
+	kafkaBroker := os.Getenv("KAFKA_BROKER_URL")
+	kafkaTopic := os.Getenv("KAFKA_ORDER_TOPIC")
+
+	producer := kafka.NewOrderProducer(kafkaBroker, kafkaTopic)
+
 	orderRepo := repository.NewOrderRepository(dbpool)
-	orderService := service.NewOrderService(orderRepo)
+	orderService := service.NewOrderService(orderRepo, producer)
 	orederHandler := handler.NewOrderHandler(orderService)
 
 	router := mux.NewRouter()

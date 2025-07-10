@@ -3,13 +3,16 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/domain"
 	"github.com/OvsyannikovAlexandr/marketplace/order-service/internal/repository"
+	"github.com/OvsyannikovAlexandr/marketplace/order-service/pkg/kafka"
 )
 
 type OrderServise struct {
-	repo repository.OrderRepositoryInterface
+	repo     repository.OrderRepositoryInterface
+	producer kafka.Producer
 }
 
 type OrderServiceInterface interface {
@@ -19,8 +22,8 @@ type OrderServiceInterface interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-func NewOrderService(repo repository.OrderRepositoryInterface) *OrderServise {
-	return &OrderServise{repo: repo}
+func NewOrderService(repo repository.OrderRepositoryInterface, producer kafka.Producer) *OrderServise {
+	return &OrderServise{repo: repo, producer: producer}
 }
 
 func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
@@ -39,6 +42,14 @@ func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
 	if order.Status == "" {
 		order.Status = "new"
 	}
+	_ = s.producer.SendOrderCreated(ctx, kafka.OrderCreatedEvent{
+		OrderID:    order.ID,
+		UserID:     order.UserID,
+		ProductIDs: order.ProductIDs,
+		TotalPrice: order.TotalPrice,
+		CreatedAt:  order.CreatedAt.Format(time.RFC3339),
+	})
+
 	return s.repo.CreateOrder(ctx, order)
 }
 
