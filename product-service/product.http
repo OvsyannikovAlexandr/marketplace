@@ -1,10 +1,10 @@
-POST http://localhost:8082/products
+POST http://localhost:8080/products
 Content-Type: "application/json"
 
 {
-    "name":"MacBookM3",
+    "name":"MacBookM2",
     "description": "Laptop",
-    "price": 2500
+    "price": 2000
 }
 
 ###
@@ -13,11 +13,11 @@ GET http://localhost:8082/products/2
 
 ###
 
-GET http://localhost:8082/products/1
+GET http://localhost:8080/products/1
 
 ###
 
-GET http://localhost:8082/products
+GET http://localhost:8080/products
 
 ###
 

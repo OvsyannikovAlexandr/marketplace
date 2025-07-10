@@ -143,6 +143,17 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+
 volumes:
   pgdata:
   redisdata:

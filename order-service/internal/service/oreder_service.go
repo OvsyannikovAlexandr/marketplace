@@ -63,7 +63,8 @@ func (s *OrderServise) Create(ctx context.Context, order domain.Order) error {
 	})
 
 	cacheKey := fmt.Sprintf("order:%d", order.ID)
-	_ = s.cache.Delete(ctx, cacheKey)
+	data, _ := json.Marshal(order)
+	_ = s.cache.Set(ctx, cacheKey, string(data), time.Minute*10)
 
 	return nil
 }
@@ -76,8 +77,8 @@ func (s *OrderServise) GetByID(ctx context.Context, id int64) (domain.Order, err
 	cacheKey := fmt.Sprintf("order:%d", id)
 
 	if cached, err := s.cache.Get(ctx, cacheKey); err == nil {
-		var order domain.Order
 		log.Println("Cache order HIT: ", cacheKey)
+		var order domain.Order
 		if err := json.Unmarshal([]byte(cached), &order); err == nil {
 			return order, nil
 		}
